@@ -1,0 +1,45 @@
+name: Scraping Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      fecha_inicio:
+        description: 'Fecha inicio (dd/mm/yyyy)'
+        required: true
+      fecha_fin:
+        description: 'Fecha fin (dd/mm/yyyy)'
+        required: true
+
+jobs:
+  run-manual-scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Ejecutar run_manual_scraper.py con fechas
+        run: |
+          python run_manual_scraper.py "${{ github.event.inputs.fecha_inicio }}" "${{ github.event.inputs.fecha_fin }}"
+
+      - name: Verificar archivos generados
+        run: ls -R historial/ || echo "No se encontraron archivos en historial/"
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+      - name: Commit y push de los CSV
+        run: |
+          git add historial/*.csv || echo "No hay archivos para agregar"
+          git commit -m "Archivos generados manualmente el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
