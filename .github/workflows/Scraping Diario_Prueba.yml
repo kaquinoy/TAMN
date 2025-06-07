@@ -6,7 +6,7 @@ name: Scraping Diariov2
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   schedule:
-    - cron: '0 12 * * *'  # Todos los días a las 12:00 UTC
+    - cron: '0 10 * * *'  # Todos los días a las 12:00 UTC
   
   #push:
   #  branches: [ "main" ]
@@ -63,5 +63,20 @@ jobs:
           git add historial/*.csv
           git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
           git push
+
+      - name: Ejecutar scraping
+        run: python Productos_Costos.py
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+      - name: Hacer commit y push del historial
+        run: |
+          git add historial/*.csv
+          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+          git push
+
+          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
