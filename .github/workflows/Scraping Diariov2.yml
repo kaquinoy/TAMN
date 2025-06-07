@@ -51,8 +51,10 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
+     #name: tasa_pasiva
+
       - name: Ejecutar scraping
-        run: python scrapersbs.py
+        run: python tasa_pasiva.py
 
       - name: Configurar Git
         run: |
@@ -63,5 +65,85 @@ jobs:
           git add historial/*.csv
           git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
           git push
+
+     #name: empleo_usa
+     
+      - name: Ejecutar scraping
+        run: python empleo_usa.py
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+      - name: Hacer commit y push del historial
+        run: |
+          git add historial/*.csv
+          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+          git push
+
+
+     #name: tipo_cambio
+     
+      - name: Ejecutar scraping
+        run: python tipo_cambio.py
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+      - name: Hacer commit y push del historial
+        run: |
+          git add historial/*.csv
+          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+          git push
+
+
+     #name: tasas_usa
+     
+      - name: Ejecutar scraping
+        run: python tasas_usa.py
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+      - name: Hacer commit y push del historial
+        run: |
+          git add historial/*.csv
+          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+          git push
+
+
+
+     #name: indice_bonos
+     
+      - name: Ejecutar scraping
+        run: python indice_bonos.py
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+      - name: Hacer commit y push del historial
+        run: |
+          git add historial/*.csv
+          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+          git push
+
+     #name: FED_inflacion
+     
+      - name: Ejecutar scraping
+        run: python FED_inflacion.py
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+      - name: Hacer commit y push del historial
+        run: |
+          git add historial/*.csv
+          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+          git push
+  
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
