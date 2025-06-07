@@ -2,9 +2,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import os
-import json
 from datetime import datetime
 import time
+import pandas as pd
 
 #Entrando a la pagina de la sbs
 driver = webdriver.Chrome()
@@ -28,35 +28,30 @@ for fila in filas:
             compra=venta
         elif (venta=="0" and compra !="0"):
             venta=compra
-        datos.append({
-            "moneda": moneda,
-            "compra": compra,
-            "venta": venta
-        })
+        #datos.append({
+        #    "moneda": moneda,
+        #    "compra": compra,
+        #    "venta": venta
+        #})
+        datos.append([moneda, compra, venta])
 # Mostrar resultado
-for d in datos:
-    print(d)
+#for d in datos:
+#    print(d)
 
-# Cerrar navegador
-driver.quit()
 
-fecha_hoy = datetime.now().strftime('%d-%m-%Y')
+df = pd.DataFrame(datos, columns=['moneda', 'compra', 'venta'])
 
-# Fecha de la consulta
+
 nueva_fecha = datetime.now().strftime('%d/%m/%Y')
 dia, mes, anio = nueva_fecha.split('/')
 fecha_consulta_f = f"{anio}-{mes}-{dia}"
 
-# Crear la carpeta destino
-#ruta_carpeta = f"{fecha_hoy}/"
-#os.makedirs(ruta_carpeta, exist_ok=True)
+# Guardar CSV
 os.makedirs('historial', exist_ok=True)
-# Definir el nombre del archivo
-#ruta_archivo = os.path.join(ruta_carpeta, 'sbs_tipo_cambio.json')
-ruta_archivo = os.path.join('historial', f"tipo_cambio_{fecha_consulta_f}.csv")
-# Guardar los datos en formato JSON
-with open(ruta_archivo, 'w', encoding='utf-8') as f:
-    json.dump(datos, f, indent=4, ensure_ascii=False)
+nombre_archivo = os.path.join('historial', f"tipo_cambio_{fecha_consulta_f}.csv")
+df.to_csv(nombre_archivo, index=False, encoding='utf-8-sig')
+print("✅ Archivo generado correctamente:", nombre_archivo)
 
-print(f"Datos guardados exitosamente en {ruta_archivo}")
+# Cerrar el navegador
+driver.quit()
 
