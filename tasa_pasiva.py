@@ -9,7 +9,7 @@ import pandas as pd
 from datetime import datetime
 import os
 
-os.chdir("C:/Users/kaqui/OneDrive/Escritorio/03.Tesis/Data/Basededatos")
+#os.chdir("C:/Users/kaqui/OneDrive/Escritorio/03.Tesis/Data/Basededatos")
 
 # Opciones de Chrome
 chrome_options = Options()
