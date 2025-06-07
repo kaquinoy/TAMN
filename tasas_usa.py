@@ -7,6 +7,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import csv
 import os
+import time
+from datetime import datetime, timedelta
+import pandas as pd
 
 def obtener_tasas_fed():
     url = "https://www.global-rates.com/es/tipos-de-interes/bancos-centrales/1002/interes-americano-fed-federal-funds-rate/"
@@ -33,49 +36,28 @@ def obtener_tasas_fed():
                 data.append([fecha, tasa])
         return data
 
+    
     finally:
         driver.quit()
-'''
-def guardar_csv(data, archivo):
-    existe = os.path.exists(archivo)
-
-     # Leer fechas existentes
-    fechas_existentes = set()
-    if existe:
-        with open(archivo, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            next(reader, None)  # saltar encabezado
-            for fila in reader:
-                if fila:
-                    fechas_existentes.add(fila[0])
-
-    # Filtrar datos nuevos
-    nuevos = [fila for fila in data if fila[0] not in fechas_existentes]
-
-    # Guardar solo datos nuevos
-    if nuevos:
-        with open(archivo, 'a' if existe else 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            if not existe:
-                writer.writerow(["Fecha", "Tasa"])
-            writer.writerows(nuevos)
-        print(f"Datos guardados: {len(nuevos)} nuevas filas")
-    else:
-        print("No se encontraron datos nuevos")
- '''   
+ 
 def main():
-    #filename = "PARCIAL/fed_tasas.csv"
-    datos = obtener_tasas_fed()
-    #guardar_csv(datos, filename)
 
+    # Aplica funcion
+    datos = obtener_tasas_fed()
+
+    # Crea el compilado de data
+    df = pd.DataFrame(datos, columns=['fecha', 'tasa'])
+
+    # Fecha de archivo
     nueva_fecha = datetime.now().strftime('%d/%m/%Y')
     dia, mes, anio = nueva_fecha.split('/')
     fecha_consulta_f = f"{anio}-{mes}-{dia}"
-    #df_final.to_excel("SBS_RETASAS_acumulado.xlsx", index=False)
+
+
     # Guardar CSV
     os.makedirs('historial', exist_ok=True)
     nombre_archivo = os.path.join('historial', f"tasas_usa_{fecha_consulta_f}.csv")
-    datos.to_csv(nombre_archivo, index=False, encoding='utf-8-sig')
+    df.to_csv(nombre_archivo, index=False, encoding='utf-8-sig')
     print("✅ Archivo generado correctamente:", nombre_archivo)
 
 

@@ -23,10 +23,8 @@ fed_api_csv = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=FEDFUNDS"
 try:
     r = requests.get(fed_api_csv)
     r.raise_for_status()
-    #fed_path = os.path.join("data", "fed", hoy)
-    fed_path = os.path.join('historial', f"fed_{fecha_consulta_f}.csv")  
-    os.makedirs(fed_path, exist_ok=True)
-    with open(os.path.join(fed_path, f"fed_{fecha_consulta_f}.csv"), "wb") as f:
+    os.makedirs('historial', exist_ok=True)
+    with open(os.path.join('historial', f"fed_{fecha_consulta_f}.csv"), "wb") as f:
         f.write(r.content)
     #print(f"[✓] Datos de la FED guardados en {fed_path}\\fedfunds.csv")
 except Exception as e:
