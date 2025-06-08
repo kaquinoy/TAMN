@@ -1,8 +1,8 @@
- import requests
+import requests
 from bs4 import BeautifulSoup
 import csv
 from datetime import datetime  # ✅ Importar datetime
-
+import os
 # Lista de indicadores esperados
 indicadores_esperados = [
     "Ganancias horarias promedio (Mensual)",
@@ -45,7 +45,7 @@ headers = {
     'User-Agent': 'Mozilla/5.0',
     'Accept-Language': 'es-ES,es;q=0.9'
 }
-
+hoy = datetime.now().strftime("%Y-%m-%d")
 # Realizar la solicitud
 response = requests.get(url, headers=headers)
 
@@ -73,11 +73,11 @@ if response.status_code == 200:
         # 👉 Agregar la fecha y hora actual
         fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         fila_datos.append(fecha_actual)
-
+        archivo_csv = os.path.join("historial", f"empleo_usa_completo_{hoy}.csv")
         # Escribir en el CSV (sin necesidad de usar pandas)
         try:
             # Abrir el archivo en modo append, para agregar sin sobrescribir
-            with open('indicadores_relacionados.csv', mode='a', newline='', encoding='utf-8') as file:
+            with open(archivo_csv, mode='a', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
 
                 # Si el archivo está vacío, escribir los encabezados primero

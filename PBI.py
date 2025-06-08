@@ -1,3 +1,4 @@
+
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -10,11 +11,11 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36'
 }
 
-URL = "https://estadisticas.bcrp.gob.pe/estadisticas/series/mensuales/resultados/PN00187MM/html"
+URL = "https://estadisticas.bcrp.gob.pe/estadisticas/series/trimestrales/resultados/PN39029BQ/html"
 
 def fetch_liquidez_table() -> pd.DataFrame:
     """
-    Extrae la tabla de liquidez en soles desde la web del BCRP y la retorna como DataFrame de dos columnas: Fecha, Liquidez.
+    Extrae la tabla de liquidez en soles desde la web del BCRP y la retorna como DataFrame de dos columnas: Fecha, PBI.
     Procesa la tabla por pares de columnas (fecha, valor) en cada fila, incluyendo el encabezado correcto.
     """
     resp = requests.get(URL, headers=HEADERS)
@@ -22,7 +23,7 @@ def fetch_liquidez_table() -> pd.DataFrame:
     soup = BeautifulSoup(resp.text, 'html.parser')
     tabla = soup.find('table', class_='series')
     if not tabla:
-        raise ValueError("No se encontró la tabla de liquidez en la página.")
+        raise ValueError("No se encontrÃ³ la tabla de liquidez en la pÃ¡gina.")
     filas = tabla.find_all('tr')
     fechas = []
     valores = []
@@ -33,7 +34,7 @@ def fetch_liquidez_table() -> pd.DataFrame:
         col_valor = encabezado[1].get_text(strip=True)
     else:
         col_fecha = "Fecha"
-        col_valor = "Liquidez"
+        col_valor = "PBI"
     # Procesar datos
     for fila in filas[1:]:  # saltar encabezado
         celdas = [celda.get_text(strip=True) for celda in fila.find_all('td')]
@@ -50,13 +51,13 @@ def fetch_liquidez_table() -> pd.DataFrame:
 def save_to_csv(data: pd.DataFrame, folder: str, tipo: str = ""):
     """
     Guarda el DataFrame en un archivo CSV en la carpeta indicada, con nombre personalizado.
-    Solo guarda un nuevo archivo si la data es diferente a la última guardada en la carpeta.
-    tipo: prefijo para el nombre del archivo (ej: 'CPI', 'Liquidez')
+    Solo guarda un nuevo archivo si la data es diferente a la Ãºltima guardada en la carpeta.
+    tipo: prefijo para el nombre del archivo (ej: 'CPI', 'PBI')
     """
     import glob
     fecha = os.path.basename(folder)
     fecha_2 = datetime.now().strftime("%Y-%m-%d")
-
+    
     if tipo:
         filename = f"datos{tipo}_{fecha}_{fecha_2}.csv"
     else:
@@ -76,10 +77,8 @@ def save_to_csv(data: pd.DataFrame, folder: str, tipo: str = ""):
         os.remove(temp_path)
     
     
-fecha = datetime.now().strftime("%Y-%m-%d")
 os.makedirs("historial", exist_ok=True)
 datos = fetch_liquidez_table()
-save_to_csv(datos, "historial", tipo='Liquidez')
-
+save_to_csv(datos, "historial", tipo='PBI')
 
 

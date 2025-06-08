@@ -1,3 +1,4 @@
+﻿
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -13,17 +14,17 @@ headers = {
 }
 
 response = requests.get(url, headers=headers)
-
+response.status_code
 if response.status_code == 200:
     soup = BeautifulSoup(response.text, 'html.parser')
-
+    
     def get_text(selector, attr, fallback='N/A'):
         element = soup.find('dd', {attr: selector})
         if element:
             value = element.text.strip().replace(',', '.').replace('%', '').replace('\xa0', ' ')
             return value.strip()
         return fallback
-
+    
     def get_range(selector):
         element = soup.find('dd', {'data-test': selector})
         if element:
@@ -34,21 +35,21 @@ if response.status_code == 200:
                     valores[1].text.strip().replace(',', '.')
                 )
         return ('N/A', 'N/A')
-
+    
     # Datos adicionales al inicio
     precio_actual = soup.find('div', {'data-test': 'instrument-price-last'})
     variacion_abs = soup.find('span', {'data-test': 'instrument-price-change'})
     variacion_pct = soup.find('span', {'data-test': 'instrument-price-change-percent'})
     trading_time = soup.find('time', {'data-test': 'trading-time-label'})
-
+    
     precio_actual = precio_actual.text.strip().replace(',', '.') if precio_actual else 'N/A'
     variacion_abs = variacion_abs.text.strip().replace(',', '.') if variacion_abs else 'N/A'
     variacion_pct = variacion_pct.text.strip().replace('%', '').replace(',', '.') if variacion_pct else 'N/A'
     trading_time = trading_time.text.strip() if trading_time else 'N/A'
-
+    
     # Fecha y hora actuales
     fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
+    
     # Datos actuales
     cierre = get_text('prevClose', 'data-test')
     apertura = get_text('open', 'data-test')
@@ -58,7 +59,7 @@ if response.status_code == 200:
     var_anual = get_text('oneYearReturn', 'data-test')
     mes_entrega = get_text('month_date', 'data-test')
     tamano_contrato = get_text('contract_size', 'data-test').split()[0]
-
+    
     # Nuevos campos
     fecha_vencimiento = get_text('settlement_date', 'data-test')
     clase_liquidacion = get_text('settlement_type', 'data-test')
@@ -67,7 +68,7 @@ if response.status_code == 200:
     simbolo_base = get_text('base_symbol', 'data-test')
     valor_punto = get_text('point_value', 'data-test')
     meses = get_text('instrument_month', 'data-test')
-
+    
     # Diccionario completo (campos nuevos al principio)
     datos = {
         'Fecha': [fecha_actual],
@@ -93,14 +94,18 @@ if response.status_code == 200:
         'Valor_Punto': [valor_punto],
         'Meses': [meses]
     }
-
+    
     df = pd.DataFrame(datos)
-
-    archivo_csv = os.path.join('historial','petroleo.csv')
+    
+    # Guardar CSV
+    hoy = datetime.now().strftime("%Y-%m-%d")
+    os.makedirs("historial", exist_ok=True)
+    archivo_csv = os.path.join("historial", f"petroleo_{hoy}.csv")
     df.to_csv(archivo_csv, mode='a', header=not os.path.exists(archivo_csv), index=False)
-
+    
+    
     print("✅ Datos guardados correctamente en petroleo.csv")
 else:
     print(f"❌ Error {response.status_code} al acceder a la página")
-    
-    
+
+
