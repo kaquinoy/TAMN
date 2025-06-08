@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -22,7 +23,7 @@ def fetch_liquidez_table() -> pd.DataFrame:
     soup = BeautifulSoup(resp.text, 'html.parser')
     tabla = soup.find('table', class_='series')
     if not tabla:
-        raise ValueError("No se encontró la tabla de liquidez en la página.")
+        raise ValueError("No se encontrÃ³ la tabla de liquidez en la pÃ¡gina.")
     filas = tabla.find_all('tr')
     fechas = []
     valores = []
@@ -50,7 +51,7 @@ def fetch_liquidez_table() -> pd.DataFrame:
 def save_to_csv(data: pd.DataFrame, folder: str, tipo: str = ""):
     """
     Guarda el DataFrame en un archivo CSV en la carpeta indicada, con nombre personalizado.
-    Solo guarda un nuevo archivo si la data es diferente a la última guardada en la carpeta.
+    Solo guarda un nuevo archivo si la data es diferente a la Ãºltima guardada en la carpeta.
     tipo: prefijo para el nombre del archivo (ej: 'CPI', 'Liquidez')
     """
     import glob
