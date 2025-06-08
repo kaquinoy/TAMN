@@ -41,6 +41,10 @@ try:
     # Renombrar columnas según lo que quieres
     df.columns = ["Moneda", "Compra", "Venta"]
 
+    # Agregar fecha
+    fecha_actual = datetime.now().strftime("%Y-%m-%d")
+    df.insert(0, "fecha_consulta", fecha_actual)
+
     # Guardar CSV
     hoy = datetime.now().strftime("%Y-%m-%d")
     os.makedirs("historial", exist_ok=True)
@@ -48,6 +52,19 @@ try:
     df.to_csv(archivo_csv, index=False, encoding='utf-8-sig')
 
     print(f"✅ Tipo de cambio guardado en: {archivo_csv}")
+
+
+    # Guardar archivo consolidado
+    consolidado_path = os.path.join("historial", "tipo_cambio.csv")
+    if os.path.exists(consolidado_path):
+        df_antiguo = pd.read_csv(consolidado_path, encoding='utf-8-sig')
+        df_total = pd.concat([df_antiguo, df], ignore_index=True)
+        df_total.drop_duplicates(subset=["fecha_consulta"], inplace=True)
+    else:
+        df_total = df
+
+    df_total.to_csv(consolidado_path, index=False, encoding='utf-8-sig')
+    print(f"📦 Consolidado actualizado en: {consolidado_path}")
 
 except Exception as e:
     print(f"❌ Error al obtener tipo de cambio: {e}")

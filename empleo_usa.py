@@ -45,7 +45,9 @@ for row in rows:
         data.append([indicador, ultimo, anterior, unidad, referencia])
 
 # Crear el DataFrame
+fecha_actual = datetime.now().strftime('%Y-%m-%d')
 df = pd.DataFrame(data, columns=["Indicador", "Último", "Anterior", "Unidad", "Referencia"])
+df.insert(0, "fecha_consulta", fecha_actual)
 # print(df)
 
 
@@ -58,6 +60,19 @@ os.makedirs('historial', exist_ok=True)
 nombre_archivo = os.path.join('historial', f"empleo_usa_{fecha_consulta_f}.csv")
 df.to_csv(nombre_archivo, index=False, encoding='utf-8-sig')
 print("✅ Archivo generado correctamente:", nombre_archivo)
+
+# Consolidado
+archivo_consolidado = os.path.join('historial', "empleo_usa.csv")
+if os.path.exists(archivo_consolidado):
+    df_existente = pd.read_csv(archivo_consolidado, encoding='utf-8-sig')
+    df_total = pd.concat([df_existente, df], ignore_index=True)
+    df_total.drop_duplicates(subset=["fecha_consulta"], inplace=True)
+else:
+    df_total = df
+
+df_total.to_csv(archivo_consolidado, index=False, encoding='utf-8-sig')
+print("📦 Consolidado actualizado:", archivo_consolidado)
+
 
 # Cerrar el navegador
 driver.quit()

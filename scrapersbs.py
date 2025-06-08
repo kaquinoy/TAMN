@@ -87,6 +87,19 @@ try:
     df.to_csv(nombre_archivo, index=False, encoding='utf-8-sig')
     print("✅ Archivo generado correctamente:", nombre_archivo)
 
+    # Consolidar en tasas.csv
+    archivo_consolidado = os.path.join('historial', 'tasas.csv')
+    if os.path.exists(archivo_consolidado):
+        df_existente = pd.read_csv(archivo_consolidado, encoding='utf-8-sig')
+        df_total = pd.concat([df_existente, df], ignore_index=True)
+        df_total.drop_duplicates(subset=['fecha_consulta', 'tipo_interes'], inplace=True)
+    else:
+        df_total = df
+
+    df_total.to_csv(archivo_consolidado, index=False, encoding='utf-8-sig')
+    print("📦 Consolidado actualizado:", archivo_consolidado)
+
+
 except Exception as e:
     print("❌ Ocurrió un error:", e)
     print("🔍 URL actual:", driver.current_url)

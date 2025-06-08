@@ -29,6 +29,12 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 # Carga la página
 driver.get("https://www.sbs.gob.pe/app/pp/EstadisticasSAEEPortal/Paginas/TIPasivaMercado.aspx?tip=B")
 
+
+# Obtener fecha
+nueva_fecha = datetime.now().strftime('%d/%m/%Y')
+dia, mes, anio = nueva_fecha.split('/')
+fecha_consulta_f = f"{anio}-{mes}-{dia}"
+
 try:
     # Esperar hasta que el contenido esté disponible (30 seg máx)
     wait = WebDriverWait(driver, 30)
@@ -41,6 +47,7 @@ try:
 
     # Crear DataFrame con los datos
     df = pd.DataFrame({
+       "fecha_consulta": [fecha_consulta_f, fecha_consulta_f],        
         "Moneda": ["Nacional (TIPMN)", "Extranjera (TIPMEX)"],
         "Tasa (%)": [tipmn, tipmex],
         "Periodo": ["Anual", "Anual"]
@@ -55,6 +62,19 @@ try:
     nombre_archivo = os.path.join('historial', f"tasa_pasiva_{fecha_consulta_f}.csv")
     df.to_csv(nombre_archivo, index=False, encoding='utf-8-sig')
     print("✅ Archivo generado correctamente:", nombre_archivo)
+
+
+    # Consolidar en tasa_pasiva.csv
+    archivo_consolidado = os.path.join('historial', 'tasa_pasiva.csv')
+    if os.path.exists(archivo_consolidado):
+        df_existente = pd.read_csv(archivo_consolidado, encoding='utf-8-sig')
+        df_total = pd.concat([df_existente, df], ignore_index=True)
+        df_total.drop_duplicates(subset=['fecha_consulta', 'moneda'], inplace=True)
+    else:
+        df_total = df
+
+    df_total.to_csv(archivo_consolidado, index=False, encoding='utf-8-sig')
+    print("📦 Consolidado actualizado:", archivo_consolidado)
 
 except Exception as e:
     print(f"❌ Error: {e}")
