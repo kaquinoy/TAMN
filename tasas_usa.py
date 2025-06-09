@@ -61,5 +61,26 @@ def main():
     print("✅ Archivo generado correctamente:", nombre_archivo)
 
 
+    # Guardar/actualizar archivo acumulado PBI.csv con columna fecha_carga
+    acumulado_path = os.path.join('historial', 'tasas_usa.csv')
+    #acumulado_path = "PBI.csv"
+    fecha_carga = datetime.now().strftime("%Y-%m-%d")
+    df['fecha_carga'] = fecha_carga
+    
+    # Leer acumulado si existe
+    if os.path.exists(acumulado_path):
+        acumulado = pd.read_csv(acumulado_path)
+        df_final = pd.concat([acumulado, df], ignore_index=True)
+        # Eliminar duplicados basados en fecha y tasa (ignora fecha_carga)
+        df_final = df_final.drop_duplicates(subset=['fecha', 'tasa'])
+    else:
+        df_final = df
+
+    # Guardar archivo actualizado
+    df_final.to_csv(acumulado_path, index=False)
+    print(f"✅ Datos acumulados guardados en {acumulado_path}")
+
+
+
 if __name__ == "__main__":
     main()

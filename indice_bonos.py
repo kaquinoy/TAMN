@@ -8,6 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 import os
 import csv
+import pandas as pd
 
 def obtener_datos():
     # Configurar opciones para Selenium
@@ -59,11 +60,27 @@ def guardar_csv(headers, datos):
         writer = csv.writer(f)
         writer.writerow(headers)
         writer.writerows(datos)
-
-
-
-    
+ 
     print(f"✅ CSV guardado como {ruta_archivo}")
+
+
+    # Convertir datos a DataFrame y agregar fecha_carga
+    df_nuevo = pd.DataFrame(datos, columns=headers)
+    df_nuevo["fecha_carga"] = datetime.now().strftime("%Y-%m-%d")
+   
+    # Ruta del archivo acumulado
+    acumulado_path = os.path.join('historial', 'indice_bonos.csv')
+   
+    if os.path.exists(acumulado_path):
+        df_acumulado = pd.read_csv(acumulado_path)
+        df_final = pd.concat([df_acumulado, df_nuevo], ignore_index=True)
+        df_final = df_final.drop_duplicates()
+    else:
+        df_final = df_nuevo
+   
+    # Guardar archivo acumulado
+    df_final.to_csv(acumulado_path, index=False)
+    print(f"✅ Datos acumulados guardados en {acumulado_path}")
 
 def main():
     headers, datos = obtener_datos()

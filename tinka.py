@@ -1,75 +1,61 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from datetime import datetime
-import csv
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 import os
 
-def obtener_resultados_tinka():
-    options = Options()
-    # COMENTA HEADLESS para ver el navegador en ejecución (para depurar)
-    # options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+url = 'https://www.resultadosdetinka.com/tinka-resultados.php'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                  'AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/120.0 Safari/537.36'
+}
 
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+response = requests.get(url, headers=headers)
+if response.status_code != 200:
+    raise Exception(f"Error {response.status_code} al acceder a la página")
 
-    try:
-        url = "https://www.tinkaresultados.com/"
-        driver.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
 
-        wait = WebDriverWait(driver, 30)
+# 1. Extraer la fecha del sorteo
+time_tag = soup.find('time')
+fecha = time_tag.text.strip() if time_tag else 'Fecha no encontrada'
 
-        # Esperar que aparezcan al menos 6 bolas como señal de carga completa
-        bolas = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.resultado .numero')))
-        numeros_tinka = [b.text.strip() for b in bolas[:6]]
+# 2. Extraer los 6 números principales
+numeros = [tag.text.strip() for tag in soup.find_all('span', class_='label label-tinka')[:6]]
 
-        # Captura screenshot para depuración
-        driver.save_screenshot("debug_tinka.png")
+# 3. Extraer Boliyapa
+# Busca el texto "Boliyapa" y luego toma el siguiente span con la clase correspondiente
+boliyapa = 'No encontrada'
+boli_section = soup.find(string=lambda t: t and 'Boliyapa' in t)
+if boli_section:
+    boli_span = soup.find('span', class_='label label-primary')
+    if boli_span:
+        boliyapa = boli_span.text.strip()
 
-        # Extraer Sí o Sí
-        si_o_si = driver.find_element(By.CSS_SELECTOR, ".siosi .numero").text.strip()
+# 4. Extraer "Sí o Sí"
+# Busca el texto "Sí o Sí" y luego toma el siguiente span con la clase correspondiente
+siosi = ['No encontrada']
+siosi_section = soup.find(string=lambda t: t and 'Sí o Sí' in t)
+if siosi_section:
+    all_primary_labels = soup.find_all('span', class_='label label-primary')
+    if len(all_primary_labels) >= 2:
+        siosi = all_primary_labels[1].text.strip().split()
+        
+        
+# Mostrar resultados
+print(f"🗓 Fecha del sorteo: {fecha}")
+print(f"🎱 Números ganadores: {' - '.join(numeros)}")
+print(f"🔵 Boliyapa: {boliyapa}")
+print(f"🎯 Sí o Sí: {' - '.join(siosi)}")
 
-        # Extraer Boliyapa
-        boliyapa = driver.find_element(By.CSS_SELECTOR, ".boliyapa .numero").text.strip()
-
-        return {
-            "fecha": datetime.now().strftime("%Y-%m-%d"),
-            "numeros": numeros_tinka,
-            "si_o_si": si_o_si,
-            "boliyapa": boliyapa
-        }
-
-    finally:
-        driver.quit()
-
-def guardar_csv(data):
-    nueva_fecha = datetime.now().strftime('%d/%m/%Y')
-    dia, mes, anio = nueva_fecha.split('/')
-    fecha_consulta_f = f"{anio}-{mes}-{dia}"    
-
-    os.makedirs("historial", exist_ok=True)
-    ruta_archivo = os.path.join('historial', f"tinka_{fecha_consulta_f}.csv")
-    with open(ruta_archivo, mode="w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.writer(f)
-        writer.writerow(["Fecha", "Números", "Sí o Sí", "Boliyapa"])
-        writer.writerow([
-            data["fecha"],
-            " ".join(data["numeros"]),
-            data["si_o_si"],
-            data["boliyapa"]
-        ])
-
-    print(f"✅ Resultados guardados en {ruta_archivo}")
-
-def main():
-    data = obtener_resultados_tinka()
-    guardar_csv(data)
-
-if __name__ == "__main__":
-    main()
+# Guardar en CSV
+datos = {
+    'Fecha': [fecha],
+    'Números principales': [' - '.join(numeros)],
+    'BolaExtra': [boliyapa],
+    'Sí o Sí': [' - '.join(siosi)]
+}
+df = pd.DataFrame(datos)
+fn = 'resultados_tinka.csv'
+df.to_csv(fn, mode='a', index=False, header=not os.path.exists(fn))
+print(f"✅ Guardado en {fn}")

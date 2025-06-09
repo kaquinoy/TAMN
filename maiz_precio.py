@@ -80,3 +80,22 @@ fecha = datetime.now().strftime("%Y-%m-%d")
 os.makedirs("historial", exist_ok=True)
 datos = fetch_liquidez_table()
 save_to_csv(datos, "historial", tipo='maiz_precio')
+
+# Guardar/actualizar archivo acumulado PBI.csv con columna fecha_carga
+acumulado_path = os.path.join('historial', 'maiz_precio.csv')
+#acumulado_path = "PBI.csv"
+fecha_carga = datetime.now().strftime("%Y-%m-%d")
+datos['fecha_carga'] = fecha_carga
+
+# Leer acumulado si existe
+if os.path.exists(acumulado_path):
+    acumulado = pd.read_csv(acumulado_path)
+    # Concatenar y eliminar duplicados
+    df_final = pd.concat([acumulado, datos], ignore_index=True)
+    df_final = df_final.drop_duplicates()
+else:
+    df_final = datos
+
+# Guardar archivo actualizado
+df_final.to_csv(acumulado_path, index=False)
+print(f"✅ Datos acumulados guardados en {acumulado_path}")
