@@ -72,7 +72,7 @@ def main():
         acumulado = pd.read_csv(acumulado_path)
         df_final = pd.concat([acumulado, df], ignore_index=True)
         # Eliminar duplicados basados en fecha y tasa (ignora fecha_carga)
-        df_final = df_final.drop_duplicates(subset=['fecha', 'tasa'])
+        # df_final = df_final.drop_duplicates(subset=['fecha', 'tasa'])
     else:
         df_final = df
 

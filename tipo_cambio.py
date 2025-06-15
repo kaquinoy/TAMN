@@ -59,7 +59,7 @@ try:
     if os.path.exists(consolidado_path):
         df_antiguo = pd.read_csv(consolidado_path, encoding='utf-8-sig')
         df_total = pd.concat([df_antiguo, df], ignore_index=True)
-        df_total.drop_duplicates(subset=["fecha_consulta"], inplace=True)
+        #df_total.drop_duplicates(subset=["fecha_consulta"], inplace=True)
     else:
         df_total = df
 

@@ -96,10 +96,26 @@ if response.status_code == 200:
 
     df = pd.DataFrame(datos)
 
-    archivo_csv = os.path.join('historial','petroleo.csv')
-    df.to_csv(archivo_csv, mode='a', header=not os.path.exists(archivo_csv), index=False)
+    #archivo_csv = os.path.join('historial','petroleo.csv')
+    #df.to_csv(archivo_csv, mode='a', header=not os.path.exists(archivo_csv), index=False)
 
-    print("✅ Datos guardados correctamente en petroleo.csv")
+    #print("✅ Datos guardados correctamente en petroleo.csv")
+    
+    
+    # Consolidar en tasas.csv
+    archivo_consolidado = os.path.join('historial', 'petroleo.csv')
+    if os.path.exists(archivo_consolidado):
+        df_existente = pd.read_csv(archivo_consolidado, encoding='utf-8-sig')
+        df_total = pd.concat([df_existente, df], ignore_index=True)
+        #df_total.drop_duplicates(subset=['fecha_consulta', 'tipo_interes'], inplace=True)
+    else:
+        df_total = df
+
+    df_total.to_csv(archivo_consolidado, index=False, encoding='utf-8-sig')
+    print("📦 Consolidado actualizado:", archivo_consolidado)
+    
+    
+    
 else:
     print(f"❌ Error {response.status_code} al acceder a la página")
     

@@ -69,12 +69,14 @@ try:
     if os.path.exists(archivo_consolidado):
         df_existente = pd.read_csv(archivo_consolidado, encoding='utf-8-sig')
         df_total = pd.concat([df_existente, df], ignore_index=True)
-        df_total.drop_duplicates(subset=['fecha_consulta', 'moneda'], inplace=True)
+        #df_total.drop_duplicates(subset=['fecha_consulta', 'moneda'], inplace=True)
     else:
         df_total = df
 
     df_total.to_csv(archivo_consolidado, index=False, encoding='utf-8-sig')
     print("📦 Consolidado actualizado:", archivo_consolidado)
+
+
 
 except Exception as e:
     print(f"❌ Error: {e}")

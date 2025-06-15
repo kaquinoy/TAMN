@@ -42,7 +42,7 @@ try:
     if os.path.exists(acumulado_path):
         acumulado = pd.read_csv(acumulado_path)
         df_final = pd.concat([acumulado, df], ignore_index=True)
-        df_final = df_final.drop_duplicates(subset=['DATE', 'FEDFUNDS'])  # evitar duplicados por fecha y tasa
+        #df_final = df_final.drop_duplicates(subset=['DATE', 'FEDFUNDS'])  # evitar duplicados por fecha y tasa
     else:
         df_final = df
 
@@ -91,7 +91,7 @@ try:
             acumulado = pd.read_csv(acumulado_path)
             # Concatenar y eliminar duplicados
             df_final = pd.concat([acumulado, tabla], ignore_index=True)
-            df_final = df_final.drop_duplicates()
+            #df_final = df_final.drop_duplicates()
         else:
             df_final = tabla
         
