@@ -153,3 +153,16 @@ if __name__ == "__main__":
     nombre_archivo = os.path.join('historial', f"producto_costo_{fecha_consulta_f}.csv")
     df_final.to_csv(nombre_archivo, index=False, encoding='utf-8-sig')
     print("✅ Archivo generado correctamente:", nombre_archivo)
+    
+    
+    # Consolidar en producto_costo.csv
+    archivo_consolidado = os.path.join('historial', 'producto_costo.csv')
+    if os.path.exists(archivo_consolidado):
+        df_existente = pd.read_csv(archivo_consolidado, encoding='utf-8-sig')
+        df_total = pd.concat([df_existente, df_final], ignore_index=True)
+        #df_total.drop_duplicates(subset=['fecha_consulta', 'tipo_interes'], inplace=True)
+    else:
+        df_total = df_final
+
+    df_total.to_csv(archivo_consolidado, index=False, encoding='utf-8-sig')
+    print("📦 Consolidado actualizado:", archivo_consolidado)
