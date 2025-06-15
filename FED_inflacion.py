@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
-
+from io import StringIO  # ✅ necesario para read_html
 
 nueva_fecha = datetime.now().strftime('%d/%m/%Y')
 dia, mes, anio = nueva_fecha.split('/')
@@ -69,8 +69,8 @@ try:
     r = requests.get(te_url, headers=headers)
     r.raise_for_status()
 
-    tables = pd.read_html(r.text)  # pandas para leer tablas del html
-
+    #tables = pd.read_html(r.text)  # pandas para leer tablas del html
+    tables = pd.read_html(StringIO(r.text))  # ✅ Corregido aquí
     #te_path = os.path.join("data", categoria, hoy)
     #os.makedirs(te_path, exist_ok=True)
 

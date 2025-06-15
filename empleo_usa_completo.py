@@ -92,20 +92,33 @@ if response.status_code == 200:
             print("✅ CSV actualizado con fecha y hora.")
 
             # Crear DataFrame para acumulado
-            datos = pd.DataFrame([fila_datos], columns=indicadores_esperados + ['fecha_hora'])
+            columnas_completas = indicadores_esperados + ['fecha_hora']
+            datos = pd.DataFrame([fila_datos], columns=columnas_completas)
             datos['fecha_carga'] = datetime.now().strftime("%Y-%m-%d")
-    
+            
             # Guardar/actualizar acumulado
             acumulado_path = os.path.join('historial', 'empleo_usa_completo.csv')
-            if os.path.exists(acumulado_path):
-                acumulado = pd.read_csv(acumulado_path)
-                df_final = pd.concat([acumulado, datos], ignore_index=True)
-                df_final = df_final.drop_duplicates()
-            else:
-                df_final = datos
-    
-            df_final.to_csv(acumulado_path, index=False)
-            print(f"✅ Datos acumulados guardados en {acumulado_path}")
+            try:
+                if os.path.exists(acumulado_path):
+                    acumulado = pd.read_csv(acumulado_path)
+            
+                    # Validar que no haya columnas duplicadas
+                    if acumulado.columns.duplicated().any():
+                        acumulado = acumulado.loc[:, ~acumulado.columns.duplicated()]
+            
+                    # Reordenar las columnas para que coincidan
+                    acumulado = acumulado.reindex(columns=datos.columns, fill_value=None)
+            
+                    df_final = pd.concat([acumulado, datos], ignore_index=True)
+                    df_final = df_final.drop_duplicates()
+                else:
+                    df_final = datos
+            
+                df_final.to_csv(acumulado_path, index=False)
+                print(f"✅ Datos acumulados guardados en {acumulado_path}")
+            
+            except Exception as e:
+                print(f"❌ Error al escribir en el archivo CSV: {e}")
 
 
         except Exception as e:

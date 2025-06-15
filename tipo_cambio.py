@@ -8,6 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 from datetime import datetime
 import os
+from io import StringIO  # ✅ Agregado
 
 # Configura las opciones de Chrome
 chrome_options = Options()
@@ -35,7 +36,8 @@ try:
     wait = WebDriverWait(driver, 30)
     tabla_element = wait.until(EC.presence_of_element_located((By.ID, "ctl00_cphContent_rgTipoCambio_ctl00")))
     tabla_html = tabla_element.get_attribute('outerHTML')
-    tablas = pd.read_html(tabla_html)
+    tablas = pd.read_html(StringIO(tabla_html))  # ✅ Corregido
+    #tablas = pd.read_html(tabla_html)
     df = tablas[0]
 
     # Renombrar columnas según lo que quieres
