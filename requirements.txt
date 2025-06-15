@@ -3,3 +3,4 @@ pandas
 webdriver-manager
 beautifulsoup4
 requests
+lxml
