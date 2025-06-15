@@ -51,21 +51,7 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
-     #name: tasa_activa
 
-      - name: Ejecutar scraping
-        run: python scrapersbs.py
-        continue-on-error: true
-        
-      - name: Configurar Git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-      - name: Hacer commit y push del historial
-        run: |
-          git add historial/*.csv
-          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
-          git push
 
       #name: Productos_Costos
       
@@ -83,37 +69,6 @@ jobs:
           git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
           git push
     
-     #name: tasa_pasiva
 
-      - name: Ejecutar scraping
-        run: python tasa_pasiva.py
-        continue-on-error: true
-
-      - name: Configurar Git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-      - name: Hacer commit y push del historial
-        run: |
-          git add historial/*.csv
-          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
-          git push
-      
-     #name: empleo_usa
-     
-      - name: Ejecutar scraping
-        run: python empleo_usa.py
-        continue-on-error: true
-        
-      - name: Configurar Git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-      - name: Hacer commit y push del historial
-        run: |
-          git add historial/*.csv
-          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
-          git push
-          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
