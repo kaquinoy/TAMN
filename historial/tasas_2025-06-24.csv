@@ -1,0 +1,5 @@
+﻿fecha_consulta,tipo_interes,valor,unidad,frecuencia,fuente
+2025-06-24,Moneda Nacional (TAMN),14.91,porcentaje,anual,SBS
+2025-06-24,Moneda Nacional (TAMN+1),15.91,porcentaje,anual,SBS
+2025-06-24,Moneda Nacional (TAMN+2),16.91,porcentaje,anual,SBS
+2025-06-24,Moneda Extranjera (TAMEX),9.55,porcentaje,anual,SBS
