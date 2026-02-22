@@ -55,19 +55,19 @@ jobs:
 
       #name: Productos_Costos
       
-      - name: Ejecutar scraping
-        run: python Productos_Costos.py
-        continue-on-error: true
+      #- name: Ejecutar scraping
+      #  run: python Productos_Costos.py
+      #  continue-on-error: true
         
-      - name: Configurar Git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-      - name: Hacer commit y push del historial
-        run: |
-          git add historial/*.csv
-          git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
-          git push
+     # - name: Configurar Git
+     #   run: |
+     #     git config user.name "github-actions"
+     #     git config user.email "actions@github.com"
+     # - name: Hacer commit y push del historial
+     #   run: |
+    #      git add historial/*.csv
+    #      git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
+    #      git push
     
 
         env:
