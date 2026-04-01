@@ -869,3 +869,6 @@ Calendar,GMT,Reference,Reference.1,Actual,Previous,Consensus,TEForecast,fecha_ca
 2026-02-01,11:30 PM,Inflation Rate YoY,Jan,1.70%,1.51%,,1.6%,2026-03-31
 2026-03-02,09:00 AM,Inflation Rate YoY,Feb,2.21%,1.70%,,1.8%,2026-03-31
 2026-04-01,07:00 AM,Inflation Rate YoY,Mar,,2.21%,,2.4%,2026-03-31
+2026-03-02,09:00 AM,Inflation Rate YoY,Feb,2.21%,1.70%,,1.8%,2026-04-01
+2026-04-01,08:00 AM,Inflation Rate YoY,Mar,3.63%,2.21%,,2.4%,2026-04-01
+2026-05-01,10:00 AM,Inflation Rate YoY,Apr,,3.63%,,,2026-04-01
