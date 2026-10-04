@@ -1,3 +1,4 @@
+import os
 import json
 import re
 import time
@@ -87,7 +88,7 @@ def cargar_pagina(page, url):
         page.locator(".newslist ul.list-group li").first.wait_for(timeout=90_000)
     except PlaywrightTimeoutError as error:
         raise RuntimeError(
-            "El BCRP no mostró registros. Verifica que Edge pueda abrir el portal "
+            "El BCRP no mostró registros. Verifica que el portal esté disponible "
             "y que no haya una verificación anti-bot pendiente."
         ) from error
     return BeautifulSoup(page.content(), "html.parser")
@@ -128,15 +129,11 @@ def cargar_estado():
         except Exception as e:
             print(f"⚠️ Error leyendo archivo de progreso: {e}. Iniciando desde cero.", flush=True)
 
-    # Buscar CSV parciales
     archivos_parciales = sorted(
         ARCHIVO_SALIDA.parent.glob("operaciones_bcrp_*.parcial.csv"),
         key=lambda archivo: archivo.stat().st_mtime,
         reverse=True,
     )
-    if len(archivos_parciales) > 1:
-        print("⚠️ Hay varios CSV parciales, se usará el más reciente.", flush=True)
-
     if archivos_parciales:
         archivo_temporal = archivos_parciales[0]
         pagina_siguiente = PAGINA_INICIAL_REANUDAR
@@ -145,7 +142,6 @@ def cargar_estado():
         print(f"CSV parcial encontrado. Reanudando desde la página {pagina_siguiente}.", flush=True)
         return archivo_temporal, url_siguiente, pagina_siguiente
 
-    # Si no hay progreso previo, crear archivo nuevo
     with NamedTemporaryFile(
         prefix="operaciones_bcrp_",
         suffix=".parcial.csv",
@@ -161,7 +157,6 @@ def cargar_estado():
     return archivo_temporal, url_siguiente, pagina_siguiente
 
 
-
 def cargar_registros_existentes(archivo_temporal):
     if archivo_temporal.stat().st_size == 0:
         return set(), 0
@@ -173,15 +168,23 @@ def cargar_registros_existentes(archivo_temporal):
     return vistos, len(tabla)
 
 
+def lanzar_browser(playwright):
+    # Detecta si estamos en GitHub Actions
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return playwright.chromium.launch(headless=True)
+    else:
+        return playwright.chromium.launch(channel="msedge", headless=False)
+
+
 def main():
     fecha_fin = date.today()
     archivo_temporal, url_actual, numero_pagina = cargar_estado()
     vistos, total_registros = cargar_registros_existentes(archivo_temporal)
 
-    print("Abriendo Microsoft Edge para consultar el portal del BCRP...", flush=True)
+    print("Abriendo navegador para consultar el portal del BCRP...", flush=True)
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(channel="msedge", headless=False)
+            browser = lanzar_browser(playwright)
             page = browser.new_page()
             while url_actual:
                 try:
@@ -191,9 +194,7 @@ def main():
                         browser.close()
                     except PlaywrightError:
                         pass
-                    browser = playwright.chromium.launch(
-                        channel="msedge", headless=False
-                    )
+                    browser = lanzar_browser(playwright)
                     page = browser.new_page()
                     soup = cargar_pagina(page, url_actual)
                 registros = []
@@ -214,8 +215,7 @@ def main():
                     total_registros += len(registros)
 
                 print(
-                    f"Página {numero_pagina}: {len(registros)} registros; "
-                    f"total {total_registros}",
+                    f"Página {numero_pagina}: {len(registros)} registros; total {total_registros}",
                     flush=True,
                 )
                 url_actual = siguiente_pagina(soup, url_actual)
