@@ -117,43 +117,35 @@ def guardar_progreso(archivo_temporal, url_siguiente, pagina_siguiente):
 
 def cargar_estado():
     if ARCHIVO_PROGRESO.exists():
-        estado = json.loads(ARCHIVO_PROGRESO.read_text(encoding="utf-8"))
-        archivo_temporal = Path(estado["archivo_parcial"])
-        if not archivo_temporal.exists():
-            raise RuntimeError(
-                f"No se encuentra el CSV parcial indicado por {ARCHIVO_PROGRESO}."
-            )
-        print(
-            f"Reanudando desde la página {estado['pagina_siguiente']}.", flush=True
-        )
-        return (
-            archivo_temporal,
-            estado["url_siguiente"],
-            estado["pagina_siguiente"],
-        )
+        try:
+            estado = json.loads(ARCHIVO_PROGRESO.read_text(encoding="utf-8"))
+            archivo_temporal = Path(estado["archivo_parcial"])
+            if archivo_temporal.exists():
+                print(f"Reanudando desde la página {estado['pagina_siguiente']}.", flush=True)
+                return archivo_temporal, estado["url_siguiente"], estado["pagina_siguiente"]
+            else:
+                print(f"⚠️ No se encontró el CSV parcial indicado, iniciando desde cero.", flush=True)
+        except Exception as e:
+            print(f"⚠️ Error leyendo archivo de progreso: {e}. Iniciando desde cero.", flush=True)
 
+    # Buscar CSV parciales
     archivos_parciales = sorted(
         ARCHIVO_SALIDA.parent.glob("operaciones_bcrp_*.parcial.csv"),
         key=lambda archivo: archivo.stat().st_mtime,
         reverse=True,
     )
     if len(archivos_parciales) > 1:
-        raise RuntimeError(
-            "Hay varios CSV parciales y no se puede elegir cuál reanudar. "
-            "Conserva el archivo correcto y mueve los demás fuera de esta carpeta."
-        )
+        print("⚠️ Hay varios CSV parciales, se usará el más reciente.", flush=True)
 
     if archivos_parciales:
         archivo_temporal = archivos_parciales[0]
         pagina_siguiente = PAGINA_INICIAL_REANUDAR
         url_siguiente = construir_url(date.today(), pagina_siguiente)
         guardar_progreso(archivo_temporal, url_siguiente, pagina_siguiente)
-        print(
-            f"CSV parcial encontrado. Reanudando desde la página {pagina_siguiente}.",
-            flush=True,
-        )
+        print(f"CSV parcial encontrado. Reanudando desde la página {pagina_siguiente}.", flush=True)
         return archivo_temporal, url_siguiente, pagina_siguiente
 
+    # Si no hay progreso previo, crear archivo nuevo
     with NamedTemporaryFile(
         prefix="operaciones_bcrp_",
         suffix=".parcial.csv",
@@ -165,7 +157,9 @@ def cargar_estado():
     pagina_siguiente = 1
     url_siguiente = construir_url(date.today(), pagina_siguiente)
     guardar_progreso(archivo_temporal, url_siguiente, pagina_siguiente)
+    print("🔄 Iniciando scraping desde cero.", flush=True)
     return archivo_temporal, url_siguiente, pagina_siguiente
+
 
 
 def cargar_registros_existentes(archivo_temporal):
