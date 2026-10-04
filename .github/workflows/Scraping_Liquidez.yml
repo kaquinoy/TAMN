@@ -19,6 +19,11 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
+      - name: Instalar Playwright
+        run: |
+          pip install playwright
+          playwright install
+
       - name: Ejecutar scraping
         run: python Proceso_Data_Liquidez.py
         continue-on-error: true
@@ -33,4 +38,5 @@ jobs:
           git add historial/*.csv
           git commit -m "Agregar archivo generado el $(date +'%Y-%m-%d')" || echo "Nada que commitear"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
+
 
