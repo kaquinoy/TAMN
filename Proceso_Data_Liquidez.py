@@ -9,13 +9,12 @@ import pandas as pd
 import os, re, time
 from datetime import date, datetime
 from pathlib import Path
-from io import StringIO
 
 # Parámetros
 URL_BASE = "https://www.bcrp.gob.pe/operaciones-monetarias-y-cambiarias.html"
-FECHA_INICIO = date(2009, 1, 5)
 ARCHIVO_SALIDA = Path(__file__).with_name("operaciones_monetarias_bcrp.csv")
 COLUMNAS = ["Fecha", "Hora", "Comentario", "Monto_millones", "Moneda"]
+
 PATRON_MONTO = re.compile(
     r"(?P<moneda>US\$|S\s*/\s*\.?|S\.)\s*"
     r"(?P<monto>\d[\d\s.]*(?:,\d+)?)\s+millones?\b",
@@ -50,15 +49,12 @@ def extraer_monto(comentario):
 
 try:
     while True:
-        wait = WebDriverWait(driver, 20)
+        wait = WebDriverWait(driver, 60)
         bloque = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".newslist")))
 
         bloques_fecha = bloque.find_elements(By.CSS_SELECTOR, ".newslist > div")
         for bf in bloques_fecha:
-            texto = bf.text.strip()
-            fecha_linea = texto.split("\n")[0].strip()
-            fecha = fecha_linea if fecha_linea else None
-
+            fecha_linea = bf.text.split("\n")[0].strip()
             items = bf.find_elements(By.CSS_SELECTOR, "ul.list-group > li")
             for item in items:
                 try:
@@ -67,7 +63,7 @@ try:
                     hora = ""
                 comentario = item.text.replace(hora, "").strip()
                 monto, moneda = extraer_monto(comentario)
-                registros.append([fecha, hora, comentario, monto, moneda])
+                registros.append([fecha_linea, hora, comentario, monto, moneda])
 
         # Intentar ir a la siguiente página
         try:
@@ -84,6 +80,7 @@ try:
     print(f"✅ Datos guardados en: {ARCHIVO_SALIDA}")
 
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"❌ Error en {driver.current_url}: {e}")
 finally:
     driver.quit()
+
